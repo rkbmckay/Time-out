@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adullam Routine & Alarm App</title>
+
+  <!-- Web App Manifest Link -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Theme Color for Mobile Browsers -->
+  <meta name="theme-color" content="#d4af37">
+  
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #161616;
+      --bg-card: #1f1f1f;
+      --gold-primary: #d4af37;
+      --gold-hover: #f3e5ab;
+      --gold-accent: #ffcc00;
+      --text-primary: #ffffff;
+      --text-muted: #b3b3b3;
+      --danger-red: #e74c3c;
+      --border-gold: rgba(212, 175, 55, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 15px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 10px 0;
+      border-bottom: 2px solid var(--gold-primary);
+    }
+
+    .header h1 {
+      color: var(--gold-primary);
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background-color: var(--gold-primary);
+      color: #000;
+      border: none;
+      padding: 8px 14px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: 0.2s ease-in-out;
+    }
+
+    .btn:hover {
+      background-color: var(--gold-hover);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--gold-primary);
+      border: 1px solid var(--gold-primary);
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-gold);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.1);
+    }
+
+    .card h2 {
+      color: var(--gold-primary);
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+      padding-bottom: 6px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    label {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    select, input[type="time"], input[type="file"] {
+      background-color: var(--bg-secondary);
+      color: var(--gold-primary);
+      border: 1px solid var(--border-gold);
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+      width: 100%;
+    }
+
+    .routines-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .routine-item {
+      background-color: var(--bg-secondary);
+      border-left: 4px solid var(--gold-primary);
+      padding: 12px;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .routine-item h3 {
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+
+    .time-inputs {
+      display: flex;
+      gap: 10px;
+    }
+
+    .time-box {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .time-box span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    /* Modal Overlay for Alarm */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .modal-content {
+      background-color: var(--bg-card);
+      border: 2px solid var(--gold-primary);
+      padding: 30px;
+      border-radius: 16px;
+      text-align: center;
+      width: 85%;
+      max-width: 380px;
+      animation: pulse-border 1.5s infinite;
+    }
+
+    .alarm-bell-icon {
+      font-size: 3.5rem;
+      margin-bottom: 10px;
+    }
+
+    #alarm-activity-title {
+      color: var(--gold-primary);
+      font-size: 1.4rem;
+      margin-bottom: 5px;
+    }
+
+    #alarm-time-display {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 25px;
+    }
+
+    .stop-btn {
+      background-color: var(--danger-red);
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 16px;
+      font-size: 1.25rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(231, 76, 60, 0.5);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @keyframes pulse-border {
+      0% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+      50% { box-shadow: 0 0 35px rgba(212, 175, 55, 0.8); }
+      100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <h1>Adullam Routine & Alarm</h1>
+      <div class="action-buttons">
+        <button id="test-sound-btn" class="btn">🔔 Test Alarm Sound</button>
+        <button id="request-permissions-btn" class="btn btn-secondary">📱 Request System Permissions</button>
+      </div>
+    </header>
+
+    <!-- Global Sound Selection -->
+    <section class="card">
+      <h2>Alarm Sound Settings</h2>
+      <div class="form-group">
+        <label for="sound-select">Choose Alarm Song / Tone:</label>
+        <select id="sound-select">
+          <option value="golden">Golden - Ejae</option>
+          <option value="beautiful_day">Beautiful Day - Jamie Grey</option>
+          <option value="classic_alarm">Classic Digital Alarm Tone</option>
+          <option value="custom">Upload Audio File from Device...</option>
+        </select>
+      </div>
+
+      <!-- File Upload for Device Audio -->
+      <div id="custom-file-wrapper" class="form-group hidden">
+        <label for="custom-audio-file">Select Song/Audio File from Storage:</label>
+        <input type="file" id="custom-audio-file" accept="audio/*">
+      </div>
+    </section>
+
+    <!-- Activity Routines List -->
+    <section class="card">
+      <h2>Activity Routines</h2>
+      <div id="routines-list" class="routines-list"></div>
+    </section>
+
+    <!-- Ringing Alarm Modal with Stop Button -->
+    <div id="alarm-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="alarm-bell-icon">🔔</div>
+        <h2 id="alarm-activity-title">Activity Alarm</h2>
+        <p id="alarm-time-display">Ringing...</p>
+        <button id="stop-alarm-btn" class="stop-btn">STOP ALARM</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ACTIVITIES = [
+      { id: 1, name: "Wake-up Time" },
+      { id: 2, name: "Quiet Time" },
+      { id: 3, name: "Bath Time" },
+      { id: 4, name: "Studies" },
+      { id: 5, name: "Break Time" },
+      { id: 6, name: "Preparatory for Adullam Players" },
+      { id: 7, name: "Adullam Prayers" },
+      { id: 8, name: "Personal Prayers" },
+      { id: 9, name: "Sleep Time" }
+    ];
+
+    const AUDIO_TRACKS = {
+      golden: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73180.mp3?filename=alarm-tone-106208.mp3",
+      beautiful_day: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=gentle-alarm-10118.mp3",
+      classic_alarm: "https://actions.google.com/sounds/v1/alarms/digital_watch_alarm.ogg"
+    };
+
+    let userRoutines = {};
+    let selectedSoundType = "golden";
+    let customAudioUrl = null;
+    let activeAudio = new Audio();
+    activeAudio.loop = true;
+
+    let audioCtx = null;
+    let synthInterval = null;
+
+    const routinesListContainer = document.getElementById("routines-list");
+    const soundSelect = document.getElementById("sound-select");
+    const customFileWrapper = document.getElementById("custom-file-wrapper");
+    const customAudioFileInput = document.getElementById("custom-audio-file");
+    const testSoundBtn = document.getElementById("test-sound-btn");
+    const requestPermissionsBtn = document.getElementById("request-permissions-btn");
+    const alarmModal = document.getElementById("alarm-modal");
+    const alarmActivityTitle = document.getElementById("alarm-activity-title");
+    const alarmTimeDisplay = document.getElementById("alarm-time-display");
+    const stopAlarmBtn = document.getElementById("stop-alarm-btn");
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadStoredData();
+      renderRoutines();
+      setupEventListeners();
+      startAlarmChecker();
+    });
+
+    function renderRoutines() {
+      routinesListContainer.innerHTML = "";
+      ACTIVITIES.forEach(activity => {
+        const routineData = userRoutines[activity.id] || { startTime: "", endTime: "" };
+        const itemEl = document.createElement("div");
+        itemEl.className = "routine-item";
+        itemEl.innerHTML = `
+          <h3>${activity.name}</h3>
+          <div class="time-inputs">
+            <div class="time-box">
+              <span>Start Time</span>
+              <input type="time" data-id="${activity.id}" data-type="startTime" value="${routineData.startTime}">
+            </div>
+            <div class="time-box">
+              <span>End Time</span>
+              <input type="time" data-id="${activity.id}" data-type="endTime" value="${routineData.endTime}">
+            </div>
+          </div>
+        `;
+        routinesListContainer.appendChild(itemEl);
+      });
+    }
+
+    function setupEventListeners() {
+      routinesListContainer.addEventListener("change", (e) => {
+        if (e.target.tagName === "INPUT" && e.target.type === "time") {
+          const id = e.target.dataset.id;
+          const type = e.target.dataset.type;
+          if (!userRoutines[id]) userRoutines[id] = { startTime: "", endTime: "" };
+          userRoutines[id][type] = e.target.value;
+          saveStoredData();
+          scheduleBackgroundNotification(id, ACTIVITIES.find(a => a.id == id).name, type, e.target.value);
+        }
+      });
+
+      soundSelect.addEventListener("change", (e) => {
+        selectedSoundType = e.target.value;
+        if (selectedSoundType === "custom") {
+          customFileWrapper.classList.remove("hidden");
+        } else {
+          customFileWrapper.classList.add("hidden");
+        }
+        saveStoredData();
+      });
+
+      customAudioFileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          if (customAudioUrl) URL.revokeObjectURL(customAudioUrl);
+          customAudioUrl = URL.createObjectURL(file);
+          alert(`Selected song "${file.name}" ready!`);
+        }
+      });
+
+      testSoundBtn.addEventListener("click", () => {
+        initAudioContext();
+        triggerRingingAlarm("Sound Test", "Manual Test", "Testing audio output...");
+      });
+
+      requestPermissionsBtn.addEventListener("click", requestPermissions);
+      stopAlarmBtn.addEventListener("click", stopAlarm);
+    }
+
+    async function requestPermissions() {
+      if (window.Capacitor && window.Capacitor.Plugins.LocalNotifications) {
+        await window.Capacitor.Plugins.LocalNotifications.requestPermissions();
+        alert("Native Notification Permissions granted!");
+      } else if ("Notification" in window) {
+        const perm = await Notification.requestPermission();
+        alert(perm === "granted" ? "Web Notification Access Granted!" : "Permission Denied.");
+      }
+    }
+
+    // Schedule background native notifications for when the app is closed
+    async function scheduleBackgroundNotification(id, name, phase, timeStr) {
+      if (!timeStr) return;
+      const [hours, minutes] = timeStr.split(":").map(Number);
+      const targetDate = new Date();
+      targetDate.setHours(hours, minutes, 0, 0);
+
+      if (targetDate < new Date()) {
+        targetDate.setDate(targetDate.getDate() + 1);
+      }
+
+      if (window.Capacitor && window.Capacitor.Plugins.LocalNotifications) {
+        const notifId = parseInt(`${id}${phase === "startTime" ? 1 : 2}`);
+        await window.Capacitor.Plugins.LocalNotifications.schedule({
+          notifications: [
+            {
+              title: `${name} (${phase === "startTime" ? "Start" : "End"})`,
+              body: `It's time for your ${name}!`,
+              id: notifId,
+              schedule: { at: targetDate, allowWhileIdle: true },
+              sound: "alarm_tone.mp3",
+              actionTypeId: "STOP_ALARM"
+            }
+          ]
+        });
+      }
+    }
+
+    function initAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+    }
+
+    function startAlarmChecker() {
+      let triggeredSet = new Set();
+      setInterval(() => {
+        const now = new Date();
+        const hrs = String(now.getHours()).padStart(2, "0");
+        const mins = String(now.getMinutes()).padStart(2, "0");
+        const curTime = `${hrs}:${mins}`;
+
+        ACTIVITIES.forEach(act => {
+          const r = userRoutines[act.id];
+          if (!r) return;
+
+          if (r.startTime === curTime && !triggeredSet.has(`${act.id}-start-${curTime}`)) {
+            triggeredSet.add(`${act.id}-start-${curTime}`);
+            triggerRingingAlarm(act.name, "Start Time", curTime);
+          }
+          if (r.endTime === curTime && !triggeredSet.has(`${act.id}-end-${curTime}`)) {
+            triggeredSet.add(`${act.id}-end-${curTime}`);
+            triggerRingingAlarm(act.name, "End Time", curTime);
+          }
+        });
+
+        if (now.getSeconds() === 0) triggeredSet.clear();
+      }, 1000);
+    }
+
+    function triggerRingingAlarm(name, phase, timeStr) {
+      initAudioContext();
+      playAlarmSound();
+      showAlarmModal(name, phase, timeStr);
+    }
+
+    function playAlarmSound() {
+      let audioSrc = selectedSoundType === "custom" && customAudioUrl 
+        ? customAudioUrl 
+        : (AUDIO_TRACKS[selectedSoundType] || AUDIO_TRACKS.classic_alarm);
+
+      activeAudio.src = audioSrc;
+      activeAudio.currentTime = 0;
+      activeAudio.loop = true;
+
+      activeAudio.play().catch(() => {
+        startSynthAlarm();
+      });
+    }
+
+    function startSynthAlarm() {
+      if (!audioCtx) initAudioContext();
+      stopSynthAlarm();
+
+      synthInterval = setInterval(() => {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      }, 500);
+    }
+
+    function stopSynthAlarm() {
+      if (synthInterval) {
+        clearInterval(synthInterval);
+        synthInterval = null;
+      }
+    }
+
+    function showAlarmModal(name, phase, timeStr) {
+      alarmActivityTitle.innerText = `${name} (${phase})`;
+      alarmTimeDisplay.innerText = `Scheduled Time: ${timeStr}`;
+      alarmModal.classList.remove("hidden");
+    }
+
+    function stopAlarm() {
+      activeAudio.pause();
+      activeAudio.currentTime = 0;
+      stopSynthAlarm();
+      alarmModal.classList.add("hidden");
+    }
+
+    function saveStoredData() {
+      localStorage.setItem("adullam_app_data", JSON.stringify({
+        routines: userRoutines,
+        soundType: selectedSoundType
+      }));
+    }
+
+    function loadStoredData() {
+      const saved = localStorage.getItem("adullam_app_data");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          userRoutines = parsed.routines || {};
+          selectedSoundType = parsed.soundType || "golden";
+          soundSelect.value = selectedSoundType;
+        } catch (e) {}
+      }
+    }
+  </script>
+</body>
+</html>
